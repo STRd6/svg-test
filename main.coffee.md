@@ -38,15 +38,16 @@ SVG Test
     ]
 
     points = []
+    lines = []
 
-    drawLines = ->
-      points.forEach (p, i) ->
+    updateLines = ->
+      lines = points.map (p, i) ->
         if i is 0
-          drawLine(p, points[points.length-1])
+          line(p, points[points.length-1])
         else
-          drawLine(p, points[i-1])
+          line(p, points[i-1])
 
-    drawLine = ([x1, y1], [x2, y2]) ->
+    line = ([x1, y1], [x2, y2]) ->
       # (y2 - y1)x - (x2 - x1)y = (x1y2 - x2y1)
 
       dy = y2 - y1
@@ -57,9 +58,13 @@ SVG Test
       y1 = (crossProduct/-dx)
       y2 = (crossProduct - width * dy)/(-dx)
 
-      paper.path ["M", 0, y1, "L", width, y2]
-      .attr
-        stroke: lineColor
+      [0, y1, width, y2]
+
+    drawLines = ->
+      lines.forEach ([x1, y1, x2, y2]) ->
+        paper.path ["M", x1, y1, "L", x2, y2]
+        .attr
+          stroke: lineColor
 
     drawCircles = ->
       points.forEach ([x, y]) ->
@@ -71,24 +76,67 @@ SVG Test
     osc = (t, period, phi=0) ->
       Math.sin TAU * t / period + phi
 
+    tracks = []
+    PATH_TIME = 10
+
+    [0..2].forEach (i) ->
+      track = tracks[i] = []
+      rate = 0.12
+
+      addBall = ->
+        track.push
+          t: 0
+          color: "rgba(0, 0, 255, 0.75)"
+
+        setTimeout addBall, expr(rate) * 1000
+      setTimeout addBall, expr(rate) * 1000
+
     update = (t) ->
       initialPoints.forEach ([x, y], i) ->
         [fx, fy] = movementFns[i](t)
         points[i] = [fx + x, fy + y]
 
+      updateLines()
+
+      tracks.forEach (track) ->
+        track.forEach (ball) ->
+          ball.t += dt
+
+        track = track.filter ({t}) ->
+          t < PATH_TIME
+
+    drawBalls = ->
+      tracks.forEach (track, i) ->
+        track.forEach (ball) ->
+          drawBall ball, i
+
+    lerp = (a, b, t) ->
+      a + (b - a) * t
+
+    pointAt = ([x1, y1, x2, y2], t) ->
+      [lerp(x1, x2, t), lerp(y1, y2, t)]
+
+    drawBall = (ball, i) ->
+      [x, y] = pointAt(lines[i], ball.t/PATH_TIME)
+      
+      paper.circle x, y, 20
+      .attr
+        fill: "rgba(0, 255, 255, 0.75)"
+        stroke: "none"
+
     draw = ->
       paper.clear()
       drawCircles()
       drawLines()
+      drawBalls()
 
     t = 0
+    dt = 1/60
 
     animate = ->
       requestAnimationFrame animate
       update(t)
       draw()
-      t += 1/60
+      t += dt
 
     requestAnimationFrame animate
-
-    followers = []
