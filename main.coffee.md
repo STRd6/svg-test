@@ -86,7 +86,7 @@ SVG Test
       addBall = ->
         track.push
           t: 0
-          color: "rgba(0, 0, 255, 0.75)"
+          r: Math.random() * 30 + 10
 
         setTimeout addBall, expr(rate) * 1000
       setTimeout addBall, expr(rate) * 1000
@@ -119,7 +119,7 @@ SVG Test
     drawBall = (ball, i) ->
       [x, y] = pointAt(lines[i], ball.t/PATH_TIME)
       
-      paper.circle x, y, 20
+      paper.circle x, y, ball.r
       .attr
         fill: "rgba(0, 255, 255, 0.75)"
         stroke: "none"
