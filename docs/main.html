@@ -34,15 +34,22 @@
               </div>
               
             </div>
-            <div class="content"><pre><code class="lang-coffeescript">style = document.createElement(<span class="string">"style"</span>)
+            <div class="content"><pre><code class="lang-coffeescript">{width, height} = require <span class="string">"./pixie"</span>
+
+style = document.createElement(<span class="string">"style"</span>)
 style.innerHTML = require <span class="string">"./style"</span>
 document.head.appendChild style
 
 paper = <span class="keyword">new</span> Raphael(document.body, <span class="string">"100%"</span>, <span class="string">"100%"</span>)
-rect = paper.rect(<span class="number">20</span>, <span class="number">20</span>, <span class="number">20</span>, <span class="number">20</span>).attr
+rect = paper.rect(<span class="number">0</span>, <span class="number">0</span>, <span class="number">50</span>, <span class="number">50</span>).attr
   fill: <span class="string">'#F00'</span>
 
-anim = Raphael.animation({transform: <span class="string">"r360"</span>}, <span class="number">1000</span>).repeat(Infinity)
+lines = <span class="number">25</span>
+[<span class="number">0.</span>.<span class="number">.3</span>*lines].forEach (n) -&gt;
+  m = width/lines
+  line = paper.path( [<span class="string">"M"</span>, n * m - width, height, <span class="string">"L"</span>, width<span class="regexp">/2, height/</span><span class="number">2</span> ] )
+
+anim = Raphael.animation({transform: <span class="string">"r360"</span>}, <span class="number">10000</span>).repeat(Infinity)
 rect.animate(anim)</code></pre>
 </div>
         </li>
