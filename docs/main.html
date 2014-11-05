@@ -71,15 +71,16 @@ movementFns = [
 ]
 
 points = []
+lines = []
 
-<span class="function"><span class="title">drawLines</span></span> = -&gt;
-  points.forEach (p, i) -&gt;
+<span class="function"><span class="title">updateLines</span></span> = -&gt;
+  lines = points.map (p, i) -&gt;
     <span class="keyword">if</span> i <span class="keyword">is</span> <span class="number">0</span>
-      drawLine(p, points[points.length-<span class="number">1</span>])
+      line(p, points[points.length-<span class="number">1</span>])
     <span class="keyword">else</span>
-      drawLine(p, points[i-<span class="number">1</span>])
+      line(p, points[i-<span class="number">1</span>])
 
-<span class="function"><span class="title">drawLine</span></span> = ([x1, y1], [x2, y2]) -&gt;
+<span class="function"><span class="title">line</span></span> = ([x1, y1], [x2, y2]) -&gt;
   <span class="comment"># (y2 - y1)x - (x2 - x1)y = (x1y2 - x2y1)</span>
 
   dy = y2 - y1
@@ -90,9 +91,13 @@ points = []
   y1 = (crossProduct/-dx)
   y2 = (crossProduct - width * dy)/(-dx)
 
-  paper.path [<span class="string">"M"</span>, <span class="number">0</span>, y1, <span class="string">"L"</span>, width, y2]
-  .attr
-    stroke: lineColor
+  [<span class="number">0</span>, y1, width, y2]
+
+<span class="function"><span class="title">drawLines</span></span> = -&gt;
+  lines.forEach ([x1, y1, x2, y2]) -&gt;
+    paper.path [<span class="string">"M"</span>, x1, y1, <span class="string">"L"</span>, x2, y2]
+    .attr
+      stroke: lineColor
 
 <span class="function"><span class="title">drawCircles</span></span> = -&gt;
   points.forEach ([x, y]) -&gt;
@@ -104,27 +109,70 @@ points = []
 <span class="function"><span class="title">osc</span></span> = (t, period, phi=<span class="number">0</span>) -&gt;
   Math.sin TAU * t / period + phi
 
+tracks = []
+PATH_TIME = <span class="number">10</span>
+
+[<span class="number">0.</span><span class="number">.2</span>].forEach (i) -&gt;
+  track = tracks[i] = []
+  rate = <span class="number">0.12</span>
+
+  <span class="function"><span class="title">addBall</span></span> = -&gt;
+    track.push
+      t: <span class="number">0</span>
+      color: <span class="string">"rgba(0, 0, 255, 0.75)"</span>
+
+    setTimeout addBall, expr(rate) * <span class="number">1000</span>
+  setTimeout addBall, expr(rate) * <span class="number">1000</span>
+
 <span class="function"><span class="title">update</span></span> = (t) -&gt;
   initialPoints.forEach ([x, y], i) -&gt;
     [fx, fy] = movementFns[i](t)
     points[i] = [fx + x, fy + y]
 
+  updateLines()
+
+  tracks.forEach (track) -&gt;
+    track.forEach (ball) -&gt;
+      ball.t += dt
+
+    track = track.filter ({t}) -&gt;
+      t &lt; PATH_TIME
+
+<span class="function"><span class="title">drawBalls</span></span> = -&gt;
+  tracks.forEach (track, i) -&gt;
+    track.forEach (ball) -&gt;
+      drawBall ball, i
+
+<span class="function"><span class="title">lerp</span></span> = (a, b, t) -&gt;
+  a + (b - a) * t
+
+<span class="function"><span class="title">pointAt</span></span> = ([x1, y1, x2, y2], t) -&gt;
+  [lerp(x1, x2, t), lerp(y1, y2, t)]
+
+<span class="function"><span class="title">drawBall</span></span> = (ball, i) -&gt;
+  [x, y] = pointAt(lines[i], ball.t/PATH_TIME)
+
+  paper.circle x, y, <span class="number">20</span>
+  .attr
+    fill: <span class="string">"rgba(0, 255, 255, 0.75)"</span>
+    stroke: <span class="string">"none"</span>
+
 <span class="function"><span class="title">draw</span></span> = -&gt;
   paper.clear()
   drawCircles()
   drawLines()
+  drawBalls()
 
 t = <span class="number">0</span>
+dt = <span class="number">1</span>/<span class="number">60</span>
 
 <span class="function"><span class="title">animate</span></span> = -&gt;
   requestAnimationFrame animate
   update(t)
   draw()
-  t += <span class="number">1</span>/<span class="number">60</span>
+  t += dt
 
-requestAnimationFrame animate
-
-followers = []</code></pre>
+requestAnimationFrame animate</code></pre>
 </div>
         </li>
         
