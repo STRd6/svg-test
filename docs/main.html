@@ -119,7 +119,7 @@ PATH_TIME = <span class="number">10</span>
   <span class="function"><span class="title">addBall</span></span> = -&gt;
     track.push
       t: <span class="number">0</span>
-      color: <span class="string">"rgba(0, 0, 255, 0.75)"</span>
+      r: Math.random() * <span class="number">30</span> + <span class="number">10</span>
 
     setTimeout addBall, expr(rate) * <span class="number">1000</span>
   setTimeout addBall, expr(rate) * <span class="number">1000</span>
@@ -152,7 +152,7 @@ PATH_TIME = <span class="number">10</span>
 <span class="function"><span class="title">drawBall</span></span> = (ball, i) -&gt;
   [x, y] = pointAt(lines[i], ball.t/PATH_TIME)
 
-  paper.circle x, y, <span class="number">20</span>
+  paper.circle x, y, ball.r
   .attr
     fill: <span class="string">"rgba(0, 255, 255, 0.75)"</span>
     stroke: <span class="string">"none"</span>
